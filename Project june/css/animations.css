@@ -1,0 +1,517 @@
+/* GoalPad Animation Definitions */
+
+/* 1. Page transitions */
+.page-exit {
+  animation: pageSlideOut 0.3s ease forwards;
+}
+
+.page-enter {
+  animation: pageSlideIn 0.3s ease forwards;
+}
+
+@keyframes pageSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+}
+
+@keyframes pageSlideIn {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 2. Page load stagger */
+.fade-down {
+  animation: fadeDown 0.5s ease forwards;
+}
+
+@keyframes fadeDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.card-reveal {
+  opacity: 0;
+  animation: cardReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.card-reveal:nth-child(1) { animation-delay: 0.1s; }
+.card-reveal:nth-child(2) { animation-delay: 0.2s; }
+.card-reveal:nth-child(3) { animation-delay: 0.3s; }
+.card-reveal:nth-child(4) { animation-delay: 0.4s; }
+.card-reveal:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes cardReveal {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 3. Ripple on buttons */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(0);
+  animation: rippleEffect 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* 4. Goal complete */
+.goal-completing {
+  animation: goalComplete 0.5s ease forwards;
+}
+
+@keyframes goalComplete {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+    background: var(--accent-dim);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.strikethrough-animate {
+  position: relative;
+}
+
+.strikethrough-animate::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--muted);
+  animation: strikeAnim 0.4s ease forwards;
+}
+
+@keyframes strikeAnim {
+  to {
+    width: 100%;
+  }
+}
+
+.points-float {
+  position: fixed;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1.25rem;
+  pointer-events: none;
+  z-index: 1001;
+  animation: floatUp 1s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-60px);
+    opacity: 0;
+  }
+}
+
+.confetti-piece {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 1001;
+  border-radius: 50%;
+  animation: confettiBurst 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes confettiBurst {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x, 50px), var(--y, -100px)) rotate(var(--r, 360deg));
+    opacity: 0;
+  }
+}
+
+/* 5. Goal added */
+.goal-new {
+  animation: goalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes goalSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+    box-shadow: 0 0 20px var(--accent);
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+    box-shadow: none;
+  }
+}
+
+/* 6. Goal deleted */
+.goal-deleting {
+  animation: goalDelete 0.4s ease forwards;
+}
+
+@keyframes goalDelete {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  30% {
+    transform: translateX(-10px);
+    background: var(--danger);
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* 7. Streak flame */
+.streak-flame {
+  animation: flamePulse 2s ease-in-out infinite;
+}
+
+@keyframes flamePulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 6px #FF6B6B);
+  }
+  50% {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 14px #FF6B6B);
+  }
+}
+
+/* 8. Badge unlock */
+.badge-unlock-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10001;
+  backdrop-filter: blur(8px);
+  animation: overlayIn 0.3s ease forwards;
+}
+
+.badge-unlock-card {
+  background: var(--bg2);
+  border: 2px solid var(--accent);
+  border-radius: 24px;
+  padding: 2.5rem;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+  animation: badgeDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes badgeDrop {
+  from {
+    transform: translateY(-80px) rotate(-180deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+}
+
+.badge-glow {
+  animation: badgeGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes badgeGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--accent);
+  }
+  50% {
+    box-shadow: 0 0 50px var(--accent);
+  }
+}
+
+/* 9. Theme toggle ripple */
+.theme-ripple {
+  position: fixed;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: themeRipple 0.6s ease-out forwards;
+  z-index: 9998;
+  pointer-events: none;
+  background: var(--bg);
+}
+
+@keyframes themeRipple {
+  to {
+    transform: scale(25);
+    opacity: 0;
+  }
+}
+
+.theme-icon-rotate {
+  animation: iconSpin 0.4s ease forwards;
+}
+
+@keyframes iconSpin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 10. Deadline alert */
+.deadline-pulse {
+  animation: borderPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 107, 107, 0);
+  }
+}
+
+.timer-shake {
+  animation: timerShake 0.5s ease infinite;
+}
+
+@keyframes timerShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+/* 11. Quote typewriter */
+.typewriter {
+  display: inline-block;
+  overflow: hidden;
+  border-right: 2px solid var(--accent);
+  white-space: nowrap;
+  animation: typewriter 3s steps(40) forwards, blinkCursor 0.75s step-end infinite;
+}
+
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blinkCursor {
+  from, to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: var(--accent);
+  }
+}
+
+/* 12. Weekly bars */
+.bar-grow {
+  transform-origin: bottom;
+  animation: barGrow 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes barGrow {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* 13. Toast transition */
+@keyframes toastIn {
+  from {
+    transform: translateX(120%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* 14. Modal */
+.modal-enter {
+  animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes modalIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 15. Carry forward popup */
+.carry-popup-enter {
+  animation: slideUpPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slideUpPop {
+  from {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 16. Input focus label float */
+.form-label-float {
+  transition: all 0.25s ease;
+}
+
+/* 17. Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg2) 25%, var(--bg3) 50%, var(--bg2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 18. Alarm popup */
+.alarm-overlay {
+  animation: overlayIn 0.3s ease forwards;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.alarm-card {
+  animation: alarmBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes alarmBounce {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.alarm-emoji.ringing {
+  animation: bellRing 0.5s ease infinite;
+}
+
+@keyframes bellRing {
+  0%, 100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-15deg);
+  }
+  75% {
+    transform: rotate(15deg);
+  }
+}
+
+/* 19. Star rating */
+.star.lit {
+  animation: starPop 0.2s ease forwards;
+}
+
+@keyframes starPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+/* 20. Progress ring draw */
+.ring-circle {
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

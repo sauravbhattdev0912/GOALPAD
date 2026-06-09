@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoalPad - Monthly Stats</title>
+  
+  <!-- CDN Links -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    checkSession();
+  </script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="fa-solid fa-compass"></i></div>
+        <span data-en="GoalPad" data-hi="गोलपैड">GoalPad</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Daily Goals" data-hi="दैनिक लक्ष्य">Daily Goals</span>
+        </a>
+        <a href="weekly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly Stats" data-hi="साप्ताहिक आंकड़े">Weekly Stats</span>
+        </a>
+        <a href="monthly.html" class="nav-item active">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly Stats" data-hi="मासिक आंकड़े">Monthly Stats</span>
+        </a>
+        <a href="reminders.html" class="nav-item">
+          <i class="fa-solid fa-bell"></i>
+          <span data-en="Reminders" data-hi="रिमाइंडर्स">Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile & Settings" data-hi="प्रोफ़ाइल व सेटिंग्स">Profile & Settings</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-bottom">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">GP</div>
+          <div class="sidebar-user-details">
+            <div class="sidebar-user-name">Guest User</div>
+            <div class="sidebar-user-email">guest@goalpad.io</div>
+          </div>
+        </div>
+        <button class="sidebar-logout" onclick="logout()" data-en="Log Out" data-hi="लॉग आउट">Log Out</button>
+      </div>
+    </div>
+    
+    <!-- Main Content Wrapper -->
+    <div class="main-content">
+      
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div>
+          <h2 style="font-family: 'Syne', sans-serif;" id="pageTitleText" data-en="Monthly Analysis" data-hi="मासिक विश्लेषण">Monthly Analysis</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <button class="btn btn-ghost btn-sm" id="langToggleBtn">हिन्दी (Hindi)</button>
+          <button class="btn btn-ghost btn-sm" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+        </div>
+      </div>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        
+        <!-- Navigation Header -->
+        <div class="fade-down" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+            <h1 style="font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; margin: 0; min-width: 200px;" id="monthlyCalendarHeader">
+              --
+            </h1>
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <button class="btn btn-secondary" onclick="exportMonthlyReport()">
+            <i class="fa-solid fa-file-pdf"></i> <span data-en="Export PDF" data-hi="पीडीएफ डाउनलोड करें">Export PDF</span>
+          </button>
+        </div>
+        
+        <!-- High Level Monthly Goals card -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <h4 class="card-title" data-en="Monthly Milestones Plan" data-hi="मासिक माइलस्टोन योजना">Monthly Milestones Plan</h4>
+          
+          <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;" class="monthly-input-row">
+            <input type="text" class="form-input" id="monthlyGoalTitle" placeholder="Enter high-level target..." data-placeholder-en="Enter high-level target..." data-placeholder-hi="मासिक लक्ष्य दर्ज करें..." style="flex: 2;">
+            <input type="text" class="form-input" id="monthlyGoalDeadline" placeholder="e.g. End of Month" data-placeholder-en="e.g. End of Month" data-placeholder-hi="जैसे: महीने का अंत" style="flex: 1;">
+            <button class="btn btn-primary" onclick="addMonthlyGoalSubmit()" data-en="Save Target" data-hi="लक्ष्य सहेजें">Save Target</button>
+          </div>
+          
+          <!-- Monthly goals lists -->
+          <div id="monthlyGoalsList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        
+        <!-- Layout Grid: Line Chart and Heatmap Grid -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-bottom: 2rem;" class="monthly-details-grid">
+          <!-- Line Chart -->
+          <div class="card">
+            <h4 class="card-title" data-en="Monthly Progress Timeline" data-hi="मासिक प्रगति समयरेखा">Monthly Progress Timeline</h4>
+            <div style="height: 250px; position: relative;">
+              <canvas id="monthlyChartCanvas"></canvas>
+            </div>
+          </div>
+          
+          <!-- GitHub-style Heatmap Grid -->
+          <div class="card">
+            <h4 class="card-title" data-en="Activity Compliance Board" data-hi="गतिविधि अनुपालन बोर्ड">Activity Compliance Board</h4>
+            <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem;" data-en="Color intensity shows completion percentage per day." data-hi="रंगों की तीव्रता प्रत्येक दिन की पूर्णता प्रतिशत दिखाती है।">
+              Color intensity shows completion percentage per day.
+            </p>
+            <div class="heatmap-grid" id="heatmapContainer">
+              <!-- Populated dynamically -->
+            </div>
+            
+            <!-- Heatmap legend -->
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.25rem; margin-top: 1rem; font-size: 0.7rem; color: var(--muted); font-weight: 600;">
+              <span data-en="Less" data-hi="कम">Less</span>
+              <div style="width: 10px; height: 10px; border-radius: 2px; background: var(--bg3)"></div>
+              <div style="width: 10px; height: 10px; border-radius: 2px; background: rgba(200,245,90,0.2)"></div>
+              <div style="width: 10px; height: 10px; border-radius: 2px; background: rgba(200,245,90,0.5)"></div>
+              <div style="width: 10px; height: 10px; border-radius: 2px; background: rgba(200,245,90,0.8)"></div>
+              <div style="width: 10px; height: 10px; border-radius: 2px; background: #C8F55A"></div>
+              <span data-en="More" data-hi="अधिक">More</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Stats Summary and Notes -->
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem;" class="monthly-notes-grid">
+          <!-- Metrics -->
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Avg Score -->
+            <div class="stat-card card">
+              <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+              <div>
+                <div class="stat-value" id="statMonthlyAvg">0%</div>
+                <div class="stat-label" data-en="Avg Completion" data-hi="औसत पूर्णता">Avg Completion</div>
+              </div>
+            </div>
+            
+            <!-- Total Goals -->
+            <div class="stat-card card">
+              <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+              <div>
+                <div class="stat-value" id="statMonthlyTotal">0</div>
+                <div class="stat-label" data-en="Total Goals" data-hi="कुल लक्ष्य">Total Goals</div>
+              </div>
+            </div>
+            
+            <!-- Longest Streak -->
+            <div class="stat-card card">
+              <div class="stat-icon" style="color: #FF6B6B;"><i class="fa-solid fa-fire"></i></div>
+              <div>
+                <div class="stat-value" id="statMonthlyStreak">0</div>
+                <div class="stat-label" data-en="Best Streak" data-hi="सर्वश्रेष्ठ स्ट्रीक">Best Streak</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Month Reflection Notes -->
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h4 class="card-title" data-en="Monthly Summary Notes" data-hi="मासिक सारांश टिप्पणियां">Monthly Summary Notes</h4>
+            <textarea class="form-textarea" id="monthlyNoteText" placeholder="Write summary here..." data-placeholder-en="Write summary here..." data-placeholder-hi="यहां सारांश लिखें..." style="flex: 1; min-height: 150px; margin-bottom: 1rem;"></textarea>
+            <button class="btn btn-primary btn-full" onclick="saveMonthlyReflection()" data-en="Save Notes" data-hi="टिप्पणी सहेजें">Save Notes</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Mobile Bottom Navigation -->
+    <div class="bottom-nav">
+      <div class="bottom-nav-items">
+        <a href="dashboard.html" class="bottom-nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Goals" data-hi="लक्ष्य">Goals</span>
+        </a>
+        <a href="weekly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly" data-hi="साप्ताहिक">Weekly</span>
+        </a>
+        <a href="monthly.html" class="bottom-nav-item active">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly" data-hi="मासिक">Monthly</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile" data-hi="प्रोफ़ाइल">Profile</span>
+        </a>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Scripts Bundle -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/proof.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    let activeDate = new Date(); // Start calendar on today
+    
+    function changeMonth(dir) {
+      activeDate.setMonth(activeDate.getMonth() + dir);
+      loadMonthlyData();
+    }
+    
+    function loadMonthlyData() {
+      const year = activeDate.getFullYear();
+      const month = activeDate.getMonth() + 1; // 1-indexed
+      const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+      
+      // 1. Set Month/Year header
+      const headerStr = activeDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+      document.getElementById('monthlyCalendarHeader').textContent = headerStr;
+      
+      // 2. Render charts
+      renderMonthlyChart('monthlyChartCanvas');
+      renderHeatmap('heatmapContainer');
+      
+      // 3. Stats calculations
+      const scoresObj = getMonthScores(year, month);
+      const activeDaysScores = scoresObj.filter(s => {
+        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(s.day).padStart(2, '0')}`;
+        return getGoals(dateStr).length > 0;
+      });
+      
+      const avg = activeDaysScores.length > 0 
+        ? Math.round(activeDaysScores.reduce((sum, item) => sum + item.score, 0) / activeDaysScores.length) 
+        : 0;
+      document.getElementById('statMonthlyAvg').textContent = `${avg}%`;
+      
+      let totalGoals = 0;
+      scoresObj.forEach(s => {
+        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(s.day).padStart(2, '0')}`;
+        totalGoals += getGoals(dateStr).length;
+      });
+      document.getElementById('statMonthlyTotal').textContent = totalGoals;
+      
+      const streak = getStreak();
+      document.getElementById('statMonthlyStreak').textContent = streak.bestStreak;
+      
+      // 4. Load notes
+      const noteKey = `monthly_note_${monthKey}`;
+      const note = localStorage.getItem(noteKey) || '';
+      document.getElementById('monthlyNoteText').value = note;
+      
+      // 5. Render Monthly High Level Goals
+      renderMonthlyGoals(monthKey);
+    }
+    
+    // Monthly Targets management
+    function renderMonthlyGoals(monthKey) {
+      const container = document.getElementById('monthlyGoalsList');
+      if (!container) return;
+      
+      const goals = getMonthlyGoals().filter(g => g.monthKey === monthKey);
+      
+      if (goals.length === 0) {
+        container.innerHTML = `
+          <p style="font-size:0.9rem; color:var(--muted); text-align:center; padding:1rem 0;">No milestones planned for this month.</p>
+        `;
+        return;
+      }
+      
+      // Progress calculation
+      const completed = goals.filter(g => g.done).length;
+      const pct = Math.round((completed / goals.length) * 100);
+      
+      let html = `
+        <div style="font-size:0.8rem; font-weight:700; color:var(--muted); margin-bottom:0.25rem;">Milestones Completed: ${completed}/${goals.length}</div>
+        <div class="progress-bar-wrap" style="height:6px; margin-bottom:1rem;">
+          <div class="progress-bar" style="width:${pct}%"></div>
+        </div>
+      `;
+      
+      html += goals.map(g => {
+        const checked = g.done ? 'checked' : '';
+        const line = g.done ? 'text-decoration:line-through; color:var(--muted);' : '';
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1rem; background:var(--bg3); border-radius:10px; border:1px solid var(--border);">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <input type="checkbox" ${checked} onclick="toggleMonthlyGoal('${g.id}')" style="width:18px; height:18px; accent-color:var(--accent); cursor:pointer;">
+              <span style="font-weight:600; font-size:0.9rem; ${line}">${g.title}</span>
+              <span class="goal-tag tag-deadline" style="font-size:0.7rem;">Target: ${g.deadline || 'End of Month'}</span>
+            </div>
+            <button class="goal-action-btn delete" onclick="deleteMonthlyGoalSubmit('${g.id}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        `;
+      }).join('');
+      
+      container.innerHTML = html;
+    }
+    
+    function addMonthlyGoalSubmit() {
+      const titleEl = document.getElementById('monthlyGoalTitle');
+      const deadlineEl = document.getElementById('monthlyGoalDeadline');
+      if (!titleEl || !titleEl.value.trim()) {
+        showToast("Please enter milestone title!", "warning");
+        return;
+      }
+      
+      const year = activeDate.getFullYear();
+      const month = activeDate.getMonth() + 1;
+      const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+      
+      const data = {
+        id: 'mgoal-' + Date.now(),
+        title: titleEl.value.trim(),
+        deadline: deadlineEl.value.trim() || 'End of Month',
+        monthKey: monthKey,
+        done: false
+      };
+      
+      saveMonthlyGoal(data);
+      titleEl.value = '';
+      deadlineEl.value = '';
+      
+      loadMonthlyData();
+      showToast("Monthly milestone saved!", "success");
+    }
+    
+    function toggleMonthlyGoal(id) {
+      const goals = getMonthlyGoals();
+      const goal = goals.find(g => g.id === id);
+      if (goal) {
+        updateMonthlyGoal(id, { done: !goal.done });
+        const year = activeDate.getFullYear();
+        const month = activeDate.getMonth() + 1;
+        const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+        renderMonthlyGoals(monthKey);
+        showToast(goal.done ? "Milestone reactivated." : "Milestone completed!", "success");
+      }
+    }
+    
+    function deleteMonthlyGoalSubmit(id) {
+      deleteMonthlyGoal(id);
+      const year = activeDate.getFullYear();
+      const month = activeDate.getMonth() + 1;
+      const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+      loadMonthlyData();
+      showToast("Milestone deleted.", "danger");
+    }
+    
+    function saveMonthlyReflection() {
+      const year = activeDate.getFullYear();
+      const month = activeDate.getMonth() + 1;
+      const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+      const noteKey = `monthly_note_${monthKey}`;
+      
+      const text = document.getElementById('monthlyNoteText').value.trim();
+      localStorage.setItem(noteKey, text);
+      showToast("Monthly summary notes saved!", "success");
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      loadMonthlyData();
+    });
+  </script>
+</body>
+</html>

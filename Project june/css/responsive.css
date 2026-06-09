@@ -1,0 +1,170 @@
+/* GoalPad Responsive Layout System */
+
+/* 1. Desktop Layout (1024px and above) */
+@media (min-width: 1024px) {
+  .sidebar {
+    width: 260px;
+    display: flex;
+  }
+  .main-content {
+    margin-left: 260px;
+  }
+  .bottom-nav {
+    display: none;
+  }
+}
+
+/* 2. Tablet Layout (768px to 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar {
+    width: 70px;
+    padding: 1.5rem 0;
+  }
+  .sidebar-logo {
+    padding: 0;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  .sidebar-logo span {
+    display: none; /* Hide brand name text */
+  }
+  .sidebar-logo-icon {
+    width: 40px;
+    height: 40px;
+  }
+  .sidebar-nav {
+    padding: 0 0.4rem;
+  }
+  .nav-item {
+    justify-content: center;
+    padding: 0.8rem 0;
+    border-radius: 10px;
+    gap: 0;
+  }
+  .nav-item span {
+    display: none; /* Hide navigation link labels */
+  }
+  .nav-item i {
+    font-size: 1.25rem;
+    width: auto;
+  }
+  .sidebar-bottom {
+    padding: 1rem 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .sidebar-user {
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  .sidebar-user-details {
+    display: none; /* Hide user name and email */
+  }
+  .sidebar-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .sidebar-logout {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0; /* Hide text */
+  }
+  .sidebar-logout::before {
+    content: '\f2f5'; /* FontAwesome sign-out icon */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 1rem;
+    color: white;
+  }
+  .main-content {
+    margin-left: 70px;
+  }
+  .bottom-nav {
+    display: none;
+  }
+}
+
+/* 3. Mobile Layout (below 768px) */
+@media (max-width: 767px) {
+  .sidebar {
+    display: none; /* Hide full sidebar */
+  }
+  .main-content {
+    margin-left: 0;
+  }
+  .bottom-nav {
+    display: block; /* Show bottom navigation bar */
+  }
+  .top-bar {
+    padding: 1rem;
+  }
+  .page-content {
+    padding: 1rem;
+    padding-bottom: 80px; /* Space for fixed bottom bar */
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .card {
+    padding: 1.25rem;
+  }
+  
+  /* Proof Modal full screen */
+  .proof-overlay {
+    padding: 0;
+  }
+  .proof-card {
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+  
+  .proof-types {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .goal-card {
+    padding: 0.875rem 1rem;
+  }
+  .goal-card-actions {
+    display: flex !important; /* Always show action items */
+  }
+  
+  /* Make typography slightly smaller on mobile */
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.2rem; }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+  
+  .carry-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .carry-banner button {
+    width: 100%;
+  }
+  
+  .number-row {
+    grid-template-columns: 1fr;
+  }
+}

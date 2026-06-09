@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoalPad - Reminders & Alarms</title>
+  
+  <!-- CDN Links -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    checkSession();
+  </script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="fa-solid fa-compass"></i></div>
+        <span data-en="GoalPad" data-hi="गोलपैड">GoalPad</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Daily Goals" data-hi="दैनिक लक्ष्य">Daily Goals</span>
+        </a>
+        <a href="weekly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly Stats" data-hi="साप्ताहिक आंकड़े">Weekly Stats</span>
+        </a>
+        <a href="monthly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly Stats" data-hi="मासिक आंकड़े">Monthly Stats</span>
+        </a>
+        <a href="reminders.html" class="nav-item active">
+          <i class="fa-solid fa-bell"></i>
+          <span data-en="Reminders" data-hi="रिमाइंडर्स">Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile & Settings" data-hi="प्रोफ़ाइल व सेटिंग्स">Profile & Settings</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-bottom">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">GP</div>
+          <div class="sidebar-user-details">
+            <div class="sidebar-user-name">Guest User</div>
+            <div class="sidebar-user-email">guest@goalpad.io</div>
+          </div>
+        </div>
+        <button class="sidebar-logout" onclick="logout()" data-en="Log Out" data-hi="लॉग आउट">Log Out</button>
+      </div>
+    </div>
+    
+    <!-- Main Content Wrapper -->
+    <div class="main-content">
+      
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div>
+          <h2 style="font-family: 'Syne', sans-serif;" id="pageTitleText" data-en="Alarms Plan" data-hi="अलार्म योजना">Alarms Plan</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <button class="btn btn-ghost btn-sm" id="langToggleBtn">हिन्दी (Hindi)</button>
+          <button class="btn btn-ghost btn-sm" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+        </div>
+      </div>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        
+        <!-- Header -->
+        <div class="fade-down" style="margin-bottom: 2rem;">
+          <h1 style="font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; margin-bottom: 0.25rem;" data-en="Alarms & Alerts" data-hi="अलार्म और अलर्ट">
+            Alarms & Alerts
+          </h1>
+          <p style="color: var(--muted); font-size: 0.95rem; font-weight: 500;" data-en="Schedule custom notifications and sound beeps" data-hi="कस्टम नोटिफिकेशन और साउंड बीप शेड्यूल करें">
+            Schedule custom notifications and sound beeps
+          </p>
+        </div>
+        
+        <!-- Layout Grid: Form and Reminders List -->
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; align-items: start;" class="reminders-layout-grid">
+          
+          <!-- Column 1: Add Reminder Form -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card">
+              <h4 class="card-title" data-en="Create Reminder" data-hi="रिमाइंडर बनाएं">Create Reminder</h4>
+              
+              <div class="form-group">
+                <label class="form-label" for="reminderLabel" data-en="Alarm Label" data-hi="अलार्म नाम">Alarm Label</label>
+                <input type="text" class="form-input" id="reminderLabel" placeholder="e.g. Code Review" data-placeholder-en="e.g. Code Review" data-placeholder-hi="जैसे: कोड समीक्षा करें">
+              </div>
+              
+              <div class="time-picker-wrap">
+                <label class="form-label" data-en="Trigger Time" data-hi="समय तय करें">Trigger Time</label>
+                <div class="time-picker-row">
+                  <select class="time-select" id="alarmHour">
+                    <!-- populated 1-12 -->
+                  </select>
+                  <span class="time-colon">:</span>
+                  <select class="time-select" id="alarmMinute">
+                    <!-- populated 00-55 -->
+                  </select>
+                  <div class="ampm-toggle" id="alarmAmPmToggle">
+                    <button class="ampm-btn active" data-value="AM" onclick="setAlarmAmPm('AM')">AM</button>
+                    <button class="ampm-btn" data-value="PM" onclick="setAlarmAmPm('PM')">PM</button>
+                  </div>
+                </div>
+                <div class="time-preview" id="alarmTimePreview">Selected Time: 08:00 AM</div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" data-en="Repeat Mode" data-hi="पुनरावृत्ति मोड">Repeat Mode</label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button type="button" class="btn btn-ghost repeat-btn active" data-value="Once" onclick="setRepeatMode(this)" style="flex: 1;" data-en="Once" data-hi="एक बार">Once</button>
+                  <button type="button" class="btn btn-ghost repeat-btn" data-value="Daily" onclick="setRepeatMode(this)" style="flex: 1;" data-en="Daily" data-hi="दैनिक">Daily</button>
+                  <button type="button" class="btn btn-ghost repeat-btn" data-value="Weekdays" onclick="setRepeatMode(this)" style="flex: 1;" data-en="Weekdays" data-hi="कार्यदिवस">Weekdays</button>
+                </div>
+              </div>
+              
+              <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                <button class="btn btn-ghost" onclick="testSound()" style="flex: 1;" data-en="Test Sound" data-hi="साउंड टेस्ट">Test Sound</button>
+                <button class="btn btn-primary" onclick="addReminderSubmit()" style="flex: 1.5;" data-en="Add Alarm" data-hi="अलार्म जोड़ें">Add Alarm</button>
+              </div>
+            </div>
+            
+            <!-- Browser notification permission card -->
+            <div class="card" style="border: 1px solid var(--border2); text-align: center;">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔔</div>
+              <h4 style="font-family:'Syne', sans-serif; margin-bottom:0.5rem;" data-en="Push Notifications" data-hi="पुश नोटिफिकेशन">Push Notifications</h4>
+              <p style="font-size:0.8rem; color:var(--muted); margin-bottom:1rem;" data-en="Enable browser prompt to receive popups while backgrounded." data-hi="पृष्ठभूमि में होने पर भी सूचनाएं प्राप्त करने के लिए पुश नोटिफिकेशन चालू करें।">
+                Enable browser prompt to receive popups while backgrounded.
+              </p>
+              <button class="btn btn-secondary btn-sm btn-full" onclick="requestNotificationAccess()" data-en="Authorize Permission" data-hi="अनुमति प्रदान करें">Authorize Permission</button>
+            </div>
+          </div>
+          
+          <!-- Column 2: Reminders List -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card">
+              <h4 class="card-title" data-en="Scheduled Alarms" data-hi="शेड्यूल किए गए अलार्म">Scheduled Alarms</h4>
+              <div id="remindersList">
+                <!-- Reminders list rendered dynamically -->
+              </div>
+            </div>
+            
+            <div style="font-size: 0.8rem; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; justify-content: center; opacity: 0.8;">
+              <i class="fa-solid fa-circle-info" style="color: var(--accent);"></i>
+              <span data-en="Reminders work actively while GoalPad is open in browser." data-hi="गोलपैड ब्राउज़र में खुले रहने पर ही रिमाइंडर काम करते हैं।">Reminders work actively while GoalPad is open in browser.</span>
+            </div>
+          </div>
+          
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Mobile Bottom Navigation -->
+    <div class="bottom-nav">
+      <div class="bottom-nav-items">
+        <a href="dashboard.html" class="bottom-nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Goals" data-hi="लक्ष्य">Goals</span>
+        </a>
+        <a href="weekly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly" data-hi="साप्ताहिक">Weekly</span>
+        </a>
+        <a href="monthly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly" data-hi="मासिक">Monthly</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile" data-hi="प्रोफ़ाइल">Profile</span>
+        </a>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Scripts Bundle -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/proof.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    let alarmTimeState = { hour: '08', minute: '00', ampm: 'AM' };
+    
+    function setAlarmAmPm(val) {
+      alarmTimeState.ampm = val;
+      document.querySelectorAll('#alarmAmPmToggle .ampm-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-value') === val);
+      });
+      updateAlarmPreview();
+    }
+    
+    function updateAlarmPreview() {
+      document.getElementById('alarmTimePreview').textContent = `Selected Time: ${alarmTimeState.hour}:${alarmTimeState.minute} ${alarmTimeState.ampm}`;
+    }
+    
+    function setRepeatMode(element) {
+      document.querySelectorAll('.repeat-btn').forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
+    }
+    
+    function populateAlarmDropdowns() {
+      const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+      const minutes = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
+      
+      const hourOptions = hours.map(h => `<option value="${h}">${h}</option>`).join('');
+      const minuteOptions = minutes.map(m => `<option value="${m}">${m}</option>`).join('');
+      
+      document.getElementById('alarmHour').innerHTML = hourOptions;
+      document.getElementById('alarmMinute').innerHTML = minuteOptions;
+      
+      document.getElementById('alarmHour').value = '08';
+      document.getElementById('alarmMinute').value = '00';
+      
+      document.getElementById('alarmHour').addEventListener('change', e => {
+        alarmTimeState.hour = e.target.value;
+        updateAlarmPreview();
+      });
+      document.getElementById('alarmMinute').addEventListener('change', e => {
+        alarmTimeState.minute = e.target.value;
+        updateAlarmPreview();
+      });
+    }
+    
+    function addReminderSubmit() {
+      // Temporary override pickerTimeState parameters in reminders.js
+      pickerTimeState = {
+        hour: alarmTimeState.hour,
+        minute: alarmTimeState.minute,
+        ampm: alarmTimeState.ampm
+      };
+      
+      addReminder();
+    }
+    
+    function requestNotificationAccess() {
+      requestNotifPermission();
+      showToast("Notification permission requested.", "success");
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      populateAlarmDropdowns();
+    });
+  </script>
+</body>
+</html>

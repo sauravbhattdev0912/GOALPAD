@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoalPad - Login</title>
+  
+  <!-- CDN Links -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <style>
+    .auth-layout {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+    .auth-left {
+      flex: 1.2;
+      background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem;
+    }
+    .auth-right {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+    }
+    .brand-logo-large {
+      font-family: 'Syne', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .brand-logo-large-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--accent);
+      color: #0E0E12;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+    .features-list {
+      margin-top: 3rem;
+      list-style: none;
+    }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .feature-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .feature-text h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+    .feature-text p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    
+    @media (max-width: 1023px) {
+      .auth-left {
+        display: none;
+      }
+      .auth-right {
+        flex: 1;
+      }
+    }
+  </style>
+  
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Immediate routing block
+    checkSession();
+  </script>
+</head>
+<body>
+  
+  <div class="auth-layout">
+    <!-- Left Panel (Desktop only) -->
+    <div class="auth-left">
+      <div class="brand-logo-large">
+        <div class="brand-logo-large-icon"><i class="fa-solid fa-compass"></i></div>
+        <span>GoalPad</span>
+      </div>
+      <p style="font-size: 1.2rem; color: var(--muted); font-weight: 500;">
+        Daily progress tracker with verifiable evidence sub-system.
+      </p>
+      
+      <ul class="features-list">
+        <li class="feature-item">
+          <div class="feature-icon"><i class="fa-solid fa-camera"></i></div>
+          <div class="feature-text">
+            <h4>Evidence validation</h4>
+            <p>Upload photos, write summaries, or log numbers to verify completions.</p>
+          </div>
+        </li>
+        <li class="feature-item">
+          <div class="feature-icon"><i class="fa-solid fa-bell"></i></div>
+          <div class="feature-text">
+            <h4>Deadline alerts & alarms</h4>
+            <p>Oscillator-based alarms warn you before deadlines expire.</p>
+          </div>
+        </li>
+        <li class="feature-item">
+          <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="feature-text">
+            <h4>Detailed progress stats</h4>
+            <p>Track weekly bar layouts, monthly progress plots, and Github heatmaps.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- Right Panel (Login form) -->
+    <div class="auth-right">
+      <!-- Login Card -->
+      <div class="card auth-card" id="loginFormCard">
+        <h2 style="font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 0.5rem;" data-en="Welcome Back" data-hi="स्वागत है">Welcome Back</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem;" data-en="Sign in to your GoalPad account" data-hi="अपने गोलपैड खाते में साइन इन करें">Sign in to your GoalPad account</p>
+        
+        <form id="loginForm" onsubmit="event.preventDefault(); handleLoginSubmit();">
+          <div class="form-group">
+            <label class="form-label" for="loginEmail" data-en="Email Address" data-hi="ईमेल पता">Email Address</label>
+            <input type="email" class="form-input" id="loginEmail" placeholder="Enter your email" data-placeholder-en="Enter your email" data-placeholder-hi="अपना ईमेल दर्ज करें">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="loginPassword" data-en="Password" data-hi="पासवर्ड">Password</label>
+            <div style="position: relative;">
+              <input type="password" class="form-input" id="loginPassword" placeholder="Enter password" data-placeholder-en="Enter password" data-placeholder-hi="पासवर्ड दर्ज करें">
+              <i class="fa-solid fa-eye-slash" id="togglePasswordIcon" onclick="togglePasswordVisibility('loginPassword', 'togglePasswordIcon')" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--muted);"></i>
+            </div>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <a href="#" onclick="showRecoveryCard()" style="color: var(--accent); font-size: 0.85rem; font-weight: 600; text-decoration: none;" data-en="Forgot Password?" data-hi="पासवर्ड भूल गए?">Forgot Password?</a>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-full" style="margin-bottom: 1.5rem;" data-en="Sign In" data-hi="साइन इन करें">Sign In</button>
+        </form>
+        
+        <div style="text-align: center; font-size: 0.9rem; color: var(--muted);">
+          <span data-en="Don't have an account?" data-hi="खाता नहीं है?">Don't have an account?</span> 
+          <a href="signup.html" style="color: var(--accent); font-weight: 600; text-decoration: none;" data-en="Sign Up" data-hi="पंजीकरण करें">Sign Up</a>
+        </div>
+      </div>
+      
+      <!-- Recovery Card (Hidden by default) -->
+      <div class="card auth-card" id="recoveryFormCard" style="display: none;">
+        <h2 style="font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 0.5rem;" data-en="Recover Password" data-hi="पासवर्ड पुनर्प्राप्त करें">Recover Password</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem;" data-en="Answer security question to reset password" data-hi="पासवर्ड रीसेट करने के लिए सुरक्षा प्रश्न का उत्तर दें">Answer security question to reset password</p>
+        
+        <form id="recoveryForm" onsubmit="event.preventDefault(); handleRecoverySubmit();">
+          <div class="form-group">
+            <label class="form-label" for="forgotEmail" data-en="Email Address" data-hi="ईमेल पता">Email Address</label>
+            <input type="email" class="form-input" id="forgotEmail" placeholder="Enter your email" onchange="loadSecurityQuestion()" data-placeholder-en="Enter your email" data-placeholder-hi="अपना ईमेल दर्ज करें">
+          </div>
+          
+          <div class="form-group" id="questionGroup" style="display: none;">
+            <label class="form-label" data-en="Security Question" data-hi="सुरक्षा प्रश्न">Security Question</label>
+            <div id="securityQuestionDisplay" style="background: var(--bg3); padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.95rem; font-weight: 500; border: 1.5px solid var(--border);">
+              --
+            </div>
+          </div>
+          
+          <div class="form-group" id="answerGroup" style="display: none;">
+            <label class="form-label" for="forgotAnswer" data-en="Security Answer" data-hi="सुरक्षा उत्तर">Security Answer</label>
+            <input type="text" class="form-input" id="forgotAnswer" placeholder="Your answer" data-placeholder-en="Your answer" data-placeholder-hi="आपका उत्तर">
+          </div>
+          
+          <div class="form-group" id="newPasswordGroup" style="display: none;">
+            <label class="form-label" for="forgotNewPassword" data-en="New Password" data-hi="नया पासवर्ड">New Password</label>
+            <div style="position: relative;">
+              <input type="password" class="form-input" id="forgotNewPassword" placeholder="Min 6 characters" data-placeholder-en="Min 6 characters" data-placeholder-hi="न्यूनतम ६ अक्षर">
+              <i class="fa-solid fa-eye-slash" id="toggleForgotIcon" onclick="togglePasswordVisibility('forgotNewPassword', 'toggleForgotIcon')" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--muted);"></i>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-full" id="recoverySubmitBtn" disabled style="margin-bottom: 1rem;" data-en="Reset Password" data-hi="पासवर्ड रीसेट करें">Reset Password</button>
+          <button type="button" class="btn btn-ghost btn-full" onclick="showLoginCard()" data-en="Back to Login" data-hi="लॉगिन पर वापस जाएं">Back to Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Scripts Bundle -->
+  <!-- Storage -> Auth -> Goals -> Proof -> Reminders -> Charts -> Export -> App -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/proof.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    // Visibility toggler
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      }
+    }
+    
+    function handleLoginSubmit() {
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPassword').value;
+      login(email, pass);
+    }
+    
+    function showRecoveryCard() {
+      document.getElementById('loginFormCard').style.display = 'none';
+      document.getElementById('recoveryFormCard').style.display = 'block';
+    }
+    
+    function showLoginCard() {
+      document.getElementById('recoveryFormCard').style.display = 'none';
+      document.getElementById('loginFormCard').style.display = 'block';
+    }
+    
+    function loadSecurityQuestion() {
+      const email = document.getElementById('forgotEmail').value;
+      const user = getUser(email);
+      
+      const qGroup = document.getElementById('questionGroup');
+      const aGroup = document.getElementById('answerGroup');
+      const passGroup = document.getElementById('newPasswordGroup');
+      const submitBtn = document.getElementById('recoverySubmitBtn');
+      const qDisplay = document.getElementById('securityQuestionDisplay');
+      
+      clearError('forgotEmail');
+      
+      if (user) {
+        qDisplay.textContent = user.securityQuestion;
+        qGroup.style.display = 'block';
+        aGroup.style.display = 'block';
+        passGroup.style.display = 'block';
+        submitBtn.disabled = false;
+      } else {
+        showError('forgotEmail', 'Email address not registered.');
+        qGroup.style.display = 'none';
+        aGroup.style.display = 'none';
+        passGroup.style.display = 'none';
+        submitBtn.disabled = true;
+      }
+    }
+    
+    function handleRecoverySubmit() {
+      const email = document.getElementById('forgotEmail').value;
+      const answer = document.getElementById('forgotAnswer').value;
+      const newPass = document.getElementById('forgotNewPassword').value;
+      
+      const success = forgotPassword(email, answer, newPass);
+      if (success) {
+        alert("Password reset successfully! Log in using your new credentials.");
+        showLoginCard();
+        // Clear inputs
+        document.getElementById('forgotEmail').value = '';
+        document.getElementById('forgotAnswer').value = '';
+        document.getElementById('forgotNewPassword').value = '';
+      }
+    }
+  </script>
+</body>
+</html>

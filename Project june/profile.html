@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoalPad - Profile & Settings</title>
+  
+  <!-- CDN Links -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <style>
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .badge-item {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 0.5rem;
+      text-align: center;
+      position: relative;
+      transition: all 0.25s;
+    }
+    .badge-item:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+    .badge-icon {
+      font-size: 2.2rem;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    .badge-name {
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .badge-desc {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+    .badge-item.locked {
+      filter: grayscale(1);
+      opacity: 0.45;
+    }
+    .badge-item.locked::after {
+      content: '\f023'; /* FontAwesome lock icon */
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .badge-date {
+      font-size: 0.65rem;
+      color: var(--accent);
+      margin-top: 0.35rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .profile-avatar-large {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      background: var(--bg3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+    .profile-avatar-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
+  
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    checkSession();
+  </script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="fa-solid fa-compass"></i></div>
+        <span data-en="GoalPad" data-hi="गोलपैड">GoalPad</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Daily Goals" data-hi="दैनिक लक्ष्य">Daily Goals</span>
+        </a>
+        <a href="weekly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly Stats" data-hi="साप्ताहिक आंकड़े">Weekly Stats</span>
+        </a>
+        <a href="monthly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly Stats" data-hi="मासिक आंकड़े">Monthly Stats</span>
+        </a>
+        <a href="reminders.html" class="nav-item">
+          <i class="fa-solid fa-bell"></i>
+          <span data-en="Reminders" data-hi="रिमाइंडर्स">Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item active">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile & Settings" data-hi="प्रोफ़ाइल व सेटिंग्स">Profile & Settings</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-bottom">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">GP</div>
+          <div class="sidebar-user-details">
+            <div class="sidebar-user-name">Guest User</div>
+            <div class="sidebar-user-email">guest@goalpad.io</div>
+          </div>
+        </div>
+        <button class="sidebar-logout" onclick="logout()" data-en="Log Out" data-hi="लॉग आउट">Log Out</button>
+      </div>
+    </div>
+    
+    <!-- Main Content Wrapper -->
+    <div class="main-content">
+      
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div>
+          <h2 style="font-family: 'Syne', sans-serif;" id="pageTitleText" data-en="Profile Settings" data-hi="प्रोफ़ाइल सेटिंग्स">Profile Settings</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <button class="btn btn-ghost btn-sm" id="langToggleBtn">हिन्दी (Hindi)</button>
+          <button class="btn btn-ghost btn-sm" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+        </div>
+      </div>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        
+        <!-- Header -->
+        <div class="fade-down" style="margin-bottom: 2rem;">
+          <h1 style="font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; margin-bottom: 0.25rem;" data-en="Manage Profile" data-hi="प्रोफ़ाइल प्रबंधित करें">
+            Manage Profile
+          </h1>
+          <p style="color: var(--muted); font-size: 0.95rem; font-weight: 500;" data-en="Modify preferences and track unlocked badges achievements" data-hi="प्राथमिकताएं बदलें और अनलॉक किए गए पुरस्कारों को ट्रैक करें">
+            Modify preferences and track unlocked badges achievements
+          </p>
+        </div>
+        
+        <!-- Standard Layout Grid: Profile Card & General Settings -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;" class="profile-layout-grid">
+          
+          <!-- Column 1: Profile Details Editing Card -->
+          <div class="card">
+            <h4 class="card-title" data-en="Personal Details" data-hi="व्यक्तिगत जानकारी">Personal Details</h4>
+            
+            <!-- Avatar modification -->
+            <div style="display: flex; gap: 1.5rem; align-items: center; margin-bottom: 1.5rem;" class="profile-avatar-row">
+              <div class="profile-avatar-large" id="profilePhotoDisplay" onclick="document.getElementById('profilePhotoFileInput').click()">
+                <img id="profilePhotoImg" src="" alt="Profile Photo">
+              </div>
+              <input type="file" id="profilePhotoFileInput" accept="image/*" style="display: none;" onchange="handleProfilePhotoUpload(event)">
+              
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('profilePhotoFileInput').click()" data-en="Change Photo" data-hi="फोटो बदलें">Change Photo</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="openProfileCamera()" data-en="Use Camera" data-hi="कैमरा उपयोग करें">Use Camera</button>
+              </div>
+            </div>
+            
+            <!-- Camera frame container -->
+            <div class="camera-modal" id="profileCameraContainer" style="display: none; width: 100%; max-width: 300px; margin-bottom: 1.5rem;">
+              <video id="profileVideo" autoplay playsinline style="width: 100%; border-radius: 12px; background: #000;"></video>
+              <div class="camera-controls">
+                <button type="button" class="capture-btn" onclick="captureProfilePhotoFrame()" data-en="Capture" data-hi="कैप्चर">Capture</button>
+                <button type="button" class="cancel-cam-btn" onclick="stopProfileCamera()" data-en="Cancel" data-hi="रद्द करें">Cancel</button>
+              </div>
+            </div>
+            
+            <!-- Details inputs -->
+            <div class="form-group">
+              <label class="form-label" for="profileName" data-en="Full Name" data-hi="पूरा नाम">Full Name</label>
+              <input type="text" class="form-input" id="profileName">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="profileEmail" data-en="Email (Read-only)" data-hi="ईमेल (केवल पठनीय)">Email (Read-only)</label>
+              <input type="email" class="form-input" id="profileEmail" readonly style="opacity: 0.65; cursor: not-allowed;">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label" for="profileAge" data-en="Age" data-hi="आयु">Age</label>
+                <input type="number" class="form-input" id="profileAge">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profileProfession" data-en="Profession" data-hi="व्यवसाय">Profession/Degree</label>
+                <input type="text" class="form-input" id="profileProfession">
+              </div>
+            </div>
+            
+            <button class="btn btn-primary btn-full" onclick="saveProfileChanges()" style="margin-top: 0.5rem;" data-en="Save Changes" data-hi="बदलाव सहेजें">Save Changes</button>
+          </div>
+          
+          <!-- Column 2: System settings and reports actions -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Performance Statistics -->
+            <div class="card">
+              <h4 class="card-title" data-en="Performance Overview" data-hi="प्रदर्शन अवलोकन">Performance Overview</h4>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="background: var(--bg3); padding: 0.75rem; border-radius: 10px; text-align: center; border: 1px solid var(--border);">
+                  <div style="font-family:'JetBrains Mono', monospace; font-size:1.5rem; font-weight:700; color:var(--accent);" id="profPoints">0</div>
+                  <div style="font-size:0.75rem; color:var(--muted); font-weight:600;" data-en="Total Points" data-hi="कुल अंक (XP)">Total Points</div>
+                </div>
+                
+                <div style="background: var(--bg3); padding: 0.75rem; border-radius: 10px; text-align: center; border: 1px solid var(--border);">
+                  <div style="font-family:'JetBrains Mono', monospace; font-size:1.5rem; font-weight:700; color:#FF6B6B;" id="profStreak">0</div>
+                  <div style="font-size:0.75rem; color:var(--muted); font-weight:600;" data-en="Best Streak" data-hi="सर्वश्रेष्ठ स्ट्रीक">Best Streak</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Exporters settings -->
+            <div class="card">
+              <h4 class="card-title" data-en="Actions & Reports" data-hi="विकल्प और रिपोर्ट">Actions & Reports</h4>
+              
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button class="btn btn-ghost btn-full" style="justify-content: flex-start;" onclick="exportWeeklyReport()">
+                  <i class="fa-solid fa-file-pdf" style="color:var(--accent)"></i>
+                  <span data-en="Download Weekly Report" data-hi="साप्ताहिक रिपोर्ट डाउनलोड करें">Download Weekly Report</span>
+                </button>
+                <button class="btn btn-ghost btn-full" style="justify-content: flex-start;" onclick="exportMonthlyReport()">
+                  <i class="fa-solid fa-file-pdf" style="color:var(--accent)"></i>
+                  <span data-en="Download Monthly Report" data-hi="मासिक रिपोर्ट डाउनलोड करें">Download Monthly Report</span>
+                </button>
+                
+                <div style="border-top:1px dashed var(--border); margin:0.5rem 0;"></div>
+                
+                <button class="btn btn-danger btn-full" onclick="wipeLocalDatabase()">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  <span data-en="Clear All App Data" data-hi="सभी डेटा हटाएं">Clear All App Data</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Badges section card layout -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <h4 class="card-title" data-en="Achievements Badges Gallery" data-hi="उपलब्धि बैज गैलरी">Achievements Badges Gallery</h4>
+          <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;" data-en="Earn points and accomplish streaks to unlock achievements." data-hi="बैज अनलॉक करने के लिए लक्ष्य पूर्ण करें और स्ट्रीक बनाएं।">
+            Earn points and accomplish streaks to unlock achievements.
+          </p>
+          
+          <div class="badges-grid" id="badgesDisplayGrid">
+            <!-- Badges populated dynamically -->
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Mobile Bottom Navigation -->
+    <div class="bottom-nav">
+      <div class="bottom-nav-items">
+        <a href="dashboard.html" class="bottom-nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Goals" data-hi="लक्ष्य">Goals</span>
+        </a>
+        <a href="weekly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly" data-hi="साप्ताहिक">Weekly</span>
+        </a>
+        <a href="monthly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly" data-hi="मासिक">Monthly</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item active">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile" data-hi="प्रोफ़ाइल">Profile</span>
+        </a>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Scripts Bundle -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/proof.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    let profilePhotoBase64 = null;
+    let profileCameraStream = null;
+    
+    // Badges definitions mapping
+    const BADGES = [
+      { id: 'first_goal', emoji: '🎯', name: 'First Goal', desc: 'Completed 1 goal' },
+      { id: 'early_bird', emoji: '🌅', name: 'Early Bird', desc: 'Done before noon' },
+      { id: 'streak_3', emoji: '🔥', name: 'Streak 3', desc: '3 consecutive days' },
+      { id: 'streak_7', emoji: '⚡', name: 'Streak 7', desc: '7 consecutive days' },
+      { id: 'streak_30', emoji: '💎', name: 'Streak 30', desc: '30 consecutive days' },
+      { id: 'honest_7', emoji: '📸', name: 'Honest 7', desc: '7 days photo proof' },
+      { id: 'honest_30', emoji: '👑', name: 'Honest 30', desc: '30 days photo proof' },
+      { id: 'perfect_week', emoji: '✨', name: 'Perfect Week', desc: '100% week score' },
+      { id: 'perfect_month', emoji: '🏆', name: 'Perfect Month', desc: '100% month score' },
+      { id: 'century', emoji: '💯', name: 'Century', desc: 'Completed 100 goals' }
+    ];
+    
+    function loadProfileData() {
+      const user = getCurrentUser();
+      if (!user) return;
+      
+      document.getElementById('profileName').value = user.fullName;
+      document.getElementById('profileEmail').value = user.email;
+      document.getElementById('profileAge').value = user.age;
+      document.getElementById('profileProfession').value = user.profession;
+      
+      const photoImg = document.getElementById('profilePhotoImg');
+      if (photoImg) photoImg.src = user.photo;
+      profilePhotoBase64 = user.photo;
+      
+      // Load stats counters
+      const streak = getStreak();
+      const points = getPoints();
+      
+      document.getElementById('profPoints').textContent = points + ' XP';
+      document.getElementById('profStreak').textContent = streak.bestStreak + ' Days';
+      
+      // Render Badges
+      renderBadgesGallery();
+    }
+    
+    function renderBadgesGallery() {
+      const container = document.getElementById('badgesDisplayGrid');
+      if (!container) return;
+      
+      const earnedBadges = getBadges(); // array of { id, earnedAt }
+      
+      container.innerHTML = BADGES.map(badge => {
+        const earnedInfo = earnedBadges.find(b => b.id === badge.id);
+        const isLocked = !earnedInfo;
+        const lockedClass = isLocked ? 'locked' : '';
+        
+        let dateHtml = '';
+        if (!isLocked) {
+          const d = new Date(earnedInfo.earnedAt);
+          dateHtml = `<div class="badge-date">${d.toLocaleDateString()}</div>`;
+        }
+        
+        return `
+          <div class="badge-item ${lockedClass}">
+            <span class="badge-icon">${badge.emoji}</span>
+            <div class="badge-name">${badge.name}</div>
+            <div class="badge-desc">${badge.desc}</div>
+            ${dateHtml}
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // File upload Avatar
+    function handleProfilePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      if (!file.type.startsWith('image/')) {
+        alert("Please select a valid image file.");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        compressProfileImage(e.target.result, (compressed) => {
+          profilePhotoBase64 = compressed;
+          document.getElementById('profilePhotoImg').src = compressed;
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // Camera stream Avatar
+    async function openProfileCamera() {
+      const container = document.getElementById('profileCameraContainer');
+      const video = document.getElementById('profileVideo');
+      
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        profileCameraStream = stream;
+        video.srcObject = stream;
+        container.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        alert("Camera initialization failed!");
+      }
+    }
+    
+    function stopProfileCamera() {
+      if (profileCameraStream) {
+        profileCameraStream.getTracks().forEach(track => track.stop());
+        profileCameraStream = null;
+      }
+      document.getElementById('profileCameraContainer').style.display = 'none';
+    }
+    
+    function captureProfilePhotoFrame() {
+      const video = document.getElementById('profileVideo');
+      if (!video || !profileCameraStream) return;
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = 150;
+      canvas.height = 150;
+      const ctx = canvas.getContext('2d');
+      
+      const size = Math.min(video.videoWidth, video.videoHeight);
+      const sx = (video.videoWidth - size) / 2;
+      const sy = (video.videoHeight - size) / 2;
+      ctx.drawImage(video, sx, sy, size, size, 0, 0, 150, 150);
+      
+      const base64 = canvas.toDataURL('image/jpeg');
+      compressProfileImage(base64, (compressed) => {
+        profilePhotoBase64 = compressed;
+        document.getElementById('profilePhotoImg').src = compressed;
+        stopProfileCamera();
+      });
+    }
+    
+    // Update User Profile changes
+    function saveProfileChanges() {
+      const user = getCurrentUser();
+      if (!user) return;
+      
+      const name = document.getElementById('profileName').value.trim();
+      const age = parseInt(document.getElementById('profileAge').value, 10);
+      const profession = document.getElementById('profileProfession').value.trim();
+      
+      if (!name || name.length < 2) {
+        showToast("Name must be at least 2 characters.", "warning");
+        return;
+      }
+      if (isNaN(age) || age < 10 || age > 100) {
+        showToast("Age must be between 10 and 100.", "warning");
+        return;
+      }
+      
+      const updates = {
+        fullName: name,
+        age: age,
+        profession: profession,
+        photo: profilePhotoBase64
+      };
+      
+      updateUser(user.email, updates);
+      
+      // Update sidebar visual details
+      loadSidebarUser();
+      showToast("Profile details updated successfully!", "success");
+      
+      if (typeof playSuccessSound === 'function') {
+        playSuccessSound();
+      }
+    }
+    
+    // Wipe local database completely
+    function wipeLocalDatabase() {
+      const check = confirm("⚠️ WARNING: This will permanently delete all your daily goals, scheduled alarms, points history, and earned badges. This action is irreversible. \n\nDo you want to continue?");
+      if (check) {
+        const check2 = confirm("Double confirmation: Delete everything and return to the signup page?");
+        if (check2) {
+          localStorage.clear();
+          sessionStorage.clear();
+          alert("All data wiped successfully. Returning to login.");
+          window.location.href = 'login.html';
+        }
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProfileData();
+    });
+  </script>
+</body>
+</html>

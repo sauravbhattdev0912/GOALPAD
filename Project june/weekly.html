@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoalPad - Weekly Stats</title>
+  
+  <!-- CDN Links -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    checkSession();
+  </script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="fa-solid fa-compass"></i></div>
+        <span data-en="GoalPad" data-hi="गोलपैड">GoalPad</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Daily Goals" data-hi="दैनिक लक्ष्य">Daily Goals</span>
+        </a>
+        <a href="weekly.html" class="nav-item active">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly Stats" data-hi="साप्ताहिक आंकड़े">Weekly Stats</span>
+        </a>
+        <a href="monthly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly Stats" data-hi="मासिक आंकड़े">Monthly Stats</span>
+        </a>
+        <a href="reminders.html" class="nav-item">
+          <i class="fa-solid fa-bell"></i>
+          <span data-en="Reminders" data-hi="रिमाइंडर्स">Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile & Settings" data-hi="प्रोफ़ाइल व सेटिंग्स">Profile & Settings</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-bottom">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">GP</div>
+          <div class="sidebar-user-details">
+            <div class="sidebar-user-name">Guest User</div>
+            <div class="sidebar-user-email">guest@goalpad.io</div>
+          </div>
+        </div>
+        <button class="sidebar-logout" onclick="logout()" data-en="Log Out" data-hi="लॉग आउट">Log Out</button>
+      </div>
+    </div>
+    
+    <!-- Main Content Wrapper -->
+    <div class="main-content">
+      
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div>
+          <h2 style="font-family: 'Syne', sans-serif;" id="pageTitleText" data-en="Weekly Performance" data-hi="साप्ताहिक प्रदर्शन">Weekly Performance</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <button class="btn btn-ghost btn-sm" id="langToggleBtn">हिन्दी (Hindi)</button>
+          <button class="btn btn-ghost btn-sm" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+        </div>
+      </div>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        
+        <!-- Header -->
+        <div class="fade-down" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h1 style="font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; margin-bottom: 0.25rem;" id="weeklyDateRangeText">
+              --
+            </h1>
+            <p style="color: var(--muted); font-size: 0.95rem; font-weight: 500;" data-en="7-day completion compliance report" data-hi="७-दिवसीय पूर्णता अनुपालन रिपोर्ट">
+              7-day completion compliance report
+            </p>
+          </div>
+          <button class="btn btn-secondary" onclick="exportWeeklyReport()">
+            <i class="fa-solid fa-file-pdf"></i> <span data-en="Export PDF" data-hi="पीडीएफ डाउनलोड करें">Export PDF</span>
+          </button>
+        </div>
+        
+        <!-- Weekly Compliance Chart -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <h4 class="card-title" data-en="Compliance Graph" data-hi="अनुपालन आलेख">Compliance Graph</h4>
+          <div style="height: 250px; position: relative;">
+            <canvas id="weeklyChartCanvas"></canvas>
+          </div>
+        </div>
+        
+        <!-- Stats Summary Row -->
+        <div class="stats-grid" style="margin-bottom: 2rem;">
+          <!-- Average Score -->
+          <div class="stat-card card">
+            <div class="stat-icon"><i class="fa-solid fa-chart-pie"></i></div>
+            <div>
+              <div class="stat-value" id="statWeeklyAvg">0%</div>
+              <div class="stat-label" data-en="Average Score" data-hi="औसत स्कोर">Average Score</div>
+            </div>
+          </div>
+          
+          <!-- Best Day -->
+          <div class="stat-card card">
+            <div class="stat-icon" style="color: var(--accent)"><i class="fa-solid fa-star"></i></div>
+            <div>
+              <div class="stat-value" id="statWeeklyBest" style="font-size: 1.4rem; padding-top: 0.3rem;">--</div>
+              <div class="stat-label" data-en="Best Day" data-hi="सर्वश्रेष्ठ दिन">Best Day</div>
+            </div>
+          </div>
+          
+          <!-- Total Completed -->
+          <div class="stat-card card">
+            <div class="stat-icon" style="color: var(--success)"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div>
+              <div class="stat-value" id="statWeeklyCompleted">0</div>
+              <div class="stat-label" data-en="Completed Goals" data-hi="पूर्ण किए गए लक्ष्य">Completed Goals</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Layout Grid: List Logs & Reflections -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem;" class="weekly-details-grid">
+          <!-- Day-by-day list -->
+          <div class="card">
+            <h4 class="card-title" data-en="Weekly Objectives Log" data-hi="साप्ताहिक उद्देश्य लॉग">Weekly Objectives Log</h4>
+            <div id="weeklyDaysList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+          
+          <!-- Weekly Notes reflection -->
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h4 class="card-title" data-en="Weekly Reflection Note" data-hi="साप्ताहिक आत्म-चिंतन नोट">Weekly Reflection Note</h4>
+            <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;" data-en="Reflect on your accomplishments and setbacks for this week." data-hi="इस सप्ताह की अपनी सफलताओं और बाधाओं पर आत्म-चिंतन करें।">
+              Reflect on your accomplishments and setbacks for this week.
+            </p>
+            
+            <textarea class="form-textarea" id="weeklyNoteText" placeholder="Write reflection here..." data-placeholder-en="Write reflection here..." data-placeholder-hi="यहां आत्म-चिंतन लिखें..." style="flex: 1; min-height: 150px; margin-bottom: 1rem;"></textarea>
+            
+            <button class="btn btn-primary btn-full" onclick="saveWeeklyReflection()" data-en="Save Reflection" data-hi="चिंतन सहेजें">Save Reflection</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Mobile Bottom Navigation -->
+    <div class="bottom-nav">
+      <div class="bottom-nav-items">
+        <a href="dashboard.html" class="bottom-nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Goals" data-hi="लक्ष्य">Goals</span>
+        </a>
+        <a href="weekly.html" class="bottom-nav-item active">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly" data-hi="साप्ताहिक">Weekly</span>
+        </a>
+        <a href="monthly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly" data-hi="मासिक">Monthly</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile" data-hi="प्रोफ़ाइल">Profile</span>
+        </a>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Scripts Bundle -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/proof.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    
+    function loadWeeklyData() {
+      // 1. Set week range title
+      const d = new Date();
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.setDate(diff));
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      
+      const options = { month: 'short', day: 'numeric' };
+      const rangeText = `${monday.toLocaleDateString('en-US', options)} - ${sunday.toLocaleDateString('en-US', options)}`;
+      document.getElementById('weeklyDateRangeText').textContent = rangeText;
+      
+      // 2. Render chart
+      renderWeeklyChart('weeklyChartCanvas');
+      
+      // 3. Stats Row calculations
+      const scores = getWeekScores();
+      const avg = Math.round(scores.reduce((a, b) => a + b, 0) / 7);
+      document.getElementById('statWeeklyAvg').textContent = `${avg}%`;
+      
+      let bestDayScore = -1;
+      let bestDayIdx = 0;
+      let totalCompleted = 0;
+      
+      for (let i = 0; i < 7; i++) {
+        const current = new Date(monday);
+        current.setDate(monday.getDate() + i);
+        const dateStr = current.toISOString().slice(0, 10);
+        const goals = getGoals(dateStr);
+        totalCompleted += goals.filter(g => g.done).length;
+        
+        if (scores[i] > bestDayScore) {
+          bestDayScore = scores[i];
+          bestDayIdx = i;
+        }
+      }
+      
+      const bestDayName = bestDayScore > 0 ? weekdays[bestDayIdx] : 'None';
+      document.getElementById('statWeeklyBest').textContent = `${bestDayName} (${bestDayScore}%)`;
+      document.getElementById('statWeeklyCompleted').textContent = totalCompleted;
+      
+      // 4. Render day list logs
+      const listContainer = document.getElementById('weeklyDaysList');
+      let html = '';
+      
+      for (let i = 0; i < 7; i++) {
+        const current = new Date(monday);
+        current.setDate(monday.getDate() + i);
+        const dateStr = current.toISOString().slice(0, 10);
+        const dayGoals = getGoals(dateStr);
+        const score = scores[i];
+        
+        let statusBadge = '';
+        if (score === 100) {
+          statusBadge = '<span class="goal-tag tag-low" style="background: rgba(74,222,128,0.15); color: #4ADE80; font-weight:700;">Perfect ✨</span>';
+        } else if (score > 0 && score < 100) {
+          statusBadge = '<span class="goal-tag tag-medium" style="background: rgba(250,204,21,0.15); color: #FACC15; font-weight:700;">Partial ⚡</span>';
+        } else if (score === 0 && dayGoals.length > 0) {
+          statusBadge = '<span class="goal-tag tag-high" style="background: rgba(255,107,107,0.15); color: #FF6B6B; font-weight:700;">Missed 😔</span>';
+        } else {
+          statusBadge = '<span class="goal-tag" style="background: rgba(255,255,255,0.06); color: var(--muted); font-weight:700;">No Goals 🍃</span>';
+        }
+        
+        html += `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1rem; background:var(--bg3); border-radius:10px; border:1px solid var(--border);">
+            <div>
+              <div style="font-weight:700; font-size:0.95rem;">${weekdays[i]} (${dateStr})</div>
+              <div style="font-size:0.8rem; color:var(--muted); margin-top:0.15rem;">
+                ${dayGoals.length} goals • ${score}% completed
+              </div>
+            </div>
+            ${statusBadge}
+          </div>
+        `;
+      }
+      listContainer.innerHTML = html;
+      
+      // 5. Load reflection note
+      const weekKey = getCurrentWeekKey();
+      const note = getWeekNote(weekKey);
+      document.getElementById('weeklyNoteText').value = note;
+    }
+    
+    function saveWeeklyReflection() {
+      const weekKey = getCurrentWeekKey();
+      const text = document.getElementById('weeklyNoteText').value.trim();
+      saveWeekNote(weekKey, text);
+      showToast("Reflection note saved!", "success");
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      loadWeeklyData();
+    });
+  </script>
+</body>
+</html>

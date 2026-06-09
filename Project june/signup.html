@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoalPad - Sign Up</title>
+  
+  <!-- CDN Links -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <style>
+    .auth-layout {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--bg);
+      padding: 2rem 1rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 480px;
+    }
+  </style>
+  
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    checkSession();
+  </script>
+</head>
+<body>
+  
+  <div class="auth-layout">
+    <div class="card auth-card">
+      <h2 style="font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 0.5rem; text-align: center;" data-en="Create Account" data-hi="खाता बनाएं">Create Account</h2>
+      <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; text-align: center;" data-en="Start tracking goals with verification proof" data-hi="सत्यापन प्रमाण के साथ लक्ष्यों को ट्रैक करना शुरू करें">Start tracking goals with verification proof</p>
+      
+      <!-- Signup Form -->
+      <form id="signupForm" onsubmit="event.preventDefault(); handleSignupSubmit();">
+        
+        <!-- Profile photo picker -->
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem;">
+          <div id="signupPhotoPreview" style="width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid var(--accent); background: var(--bg3); display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; margin-bottom: 0.5rem;" onclick="document.getElementById('signupPhotoFileInput').click()">
+            <i class="fa-solid fa-user-plus" style="font-size: 1.8rem; color: var(--muted);" id="signupPlaceholderIcon"></i>
+            <img id="signupPhotoImg" src="" alt="Signup Preview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <input type="file" id="signupPhotoFileInput" accept="image/*" style="display: none;" onchange="handleSignupPhotoUpload(event)">
+          
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('signupPhotoFileInput').click()" data-en="Upload" data-hi="अपलोड करें">
+              <i class="fa-solid fa-upload"></i> Upload
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="openSignupCamera()" data-en="Camera" data-hi="कैमरा">
+              <i class="fa-solid fa-camera"></i> Camera
+            </button>
+          </div>
+          
+          <!-- Camera View Container -->
+          <div class="camera-modal" id="signupCameraContainer" style="display: none; width: 100%; max-width: 320px; margin-top: 1rem;">
+            <video id="signupVideo" autoplay playsinline style="width: 100%; border-radius: 12px; background: #000;"></video>
+            <div class="camera-controls">
+              <button type="button" class="capture-btn" onclick="captureSignupPhotoFrame()" data-en="Capture" data-hi="कैप्चर">Capture</button>
+              <button type="button" class="cancel-cam-btn" onclick="stopSignupCamera()" data-en="Cancel" data-hi="रद्द करें">Cancel</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Details grid -->
+        <div class="form-group">
+          <label class="form-label" for="signupName" data-en="Full Name" data-hi="पूरा नाम">Full Name</label>
+          <input type="text" class="form-input" id="signupName" placeholder="John Doe" data-placeholder-en="John Doe" data-placeholder-hi="पूरा नाम">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="signupEmail" data-en="Email Address" data-hi="ईमेल पता">Email Address</label>
+          <input type="email" class="form-input" id="signupEmail" placeholder="john@example.com" data-placeholder-en="john@example.com" data-placeholder-hi="ईमेल पता">
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label" for="signupAge" data-en="Age" data-hi="आयु">Age</label>
+            <input type="number" class="form-input" id="signupAge" placeholder="25" data-placeholder-en="25" data-placeholder-hi="आयु">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupProfession" data-en="Profession" data-hi="व्यवसाय">Profession/Degree</label>
+            <input type="text" class="form-input" id="signupProfession" placeholder="Developer" data-placeholder-en="Developer" data-placeholder-hi="व्यवसाय">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="signupPassword" data-en="Password" data-hi="पासवर्ड">Password</label>
+          <div style="position: relative;">
+            <input type="password" class="form-input" id="signupPassword" placeholder="Min 6 characters" data-placeholder-en="Min 6 characters" data-placeholder-hi="कम से कम ६ अक्षर">
+            <i class="fa-solid fa-eye-slash" id="togglePassIcon" onclick="togglePasswordVisibility('signupPassword', 'togglePassIcon')" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--muted);"></i>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="signupConfirmPassword" data-en="Confirm Password" data-hi="पासवर्ड की पुष्टि करें">Confirm Password</label>
+          <div style="position: relative;">
+            <input type="password" class="form-input" id="signupConfirmPassword" placeholder="Re-enter password" data-placeholder-en="Re-enter password" data-placeholder-hi="पासवर्ड फिर से लिखें">
+            <i class="fa-solid fa-eye-slash" id="toggleConfirmIcon" onclick="togglePasswordVisibility('signupConfirmPassword', 'toggleConfirmIcon')" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--muted);"></i>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="signupSecurityQuestion" data-en="Security Question" data-hi="सुरक्षा प्रश्न">Security Question</label>
+          <select class="form-select" id="signupSecurityQuestion">
+            <option value="Tumhara pehla school?" data-en="What was your first school?" data-hi="तुम्हारा पहला स्कूल?">Tumhara pehla school?</option>
+            <option value="Tumhari maa ka naam?" data-en="What is your mother's name?" data-hi="तुम्हारी मां का नाम?">Tumhari maa ka naam?</option>
+            <option value="Tumhara favorite subject?" data-en="What is your favorite subject?" data-hi="तुम्हारा पसंदीदा विषय?">Tumhara favorite subject?</option>
+            <option value="Tumhara best friend ka naam?" data-en="What is your best friend's name?" data-hi="तुम्हारे प्रिय मित्र का नाम?">Tumhara best friend ka naam?</option>
+            <option value="Pehli cycle ka rang?" data-en="What was the color of your first cycle?" data-hi="पहली साइकिल का रंग?">Pehli cycle ka rang?</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="signupSecurityAnswer" data-en="Security Answer" data-hi="सुरक्षा उत्तर">Security Answer</label>
+          <input type="text" class="form-input" id="signupSecurityAnswer" placeholder="Your secret answer" data-placeholder-en="Your secret answer" data-placeholder-hi="तुम्हारा गुप्त उत्तर">
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 1rem; margin-bottom: 1.5rem;" data-en="Sign Up" data-hi="पंजीकरण करें">Sign Up</button>
+      </form>
+      
+      <div style="text-align: center; font-size: 0.9rem; color: var(--muted);">
+        <span data-en="Already have an account?" data-hi="पहले से खाता है?">Already have an account?</span> 
+        <a href="login.html" style="color: var(--accent); font-weight: 600; text-decoration: none;" data-en="Login" data-hi="लॉगिन करें">Login</a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Scripts Bundle -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/proof.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    let signupPhotoBase64 = null;
+    let signupCameraStream = null;
+    
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      }
+    }
+    
+    // File upload
+    function handleSignupPhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      if (!file.type.startsWith('image/')) {
+        alert("Please select a valid image.");
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Photo size must be less than 5MB.");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        compressProfileImage(e.target.result, (compressed) => {
+          signupPhotoBase64 = compressed;
+          const previewImg = document.getElementById('signupPhotoImg');
+          const placeholderIcon = document.getElementById('signupPlaceholderIcon');
+          
+          previewImg.src = compressed;
+          previewImg.style.display = 'block';
+          placeholderIcon.style.display = 'none';
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // Webcam stream
+    async function openSignupCamera() {
+      const container = document.getElementById('signupCameraContainer');
+      const video = document.getElementById('signupVideo');
+      
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        signupCameraStream = stream;
+        video.srcObject = stream;
+        container.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        alert("Webcam access failed! Please upload an image instead.");
+      }
+    }
+    
+    function stopSignupCamera() {
+      if (signupCameraStream) {
+        signupCameraStream.getTracks().forEach(track => track.stop());
+        signupCameraStream = null;
+      }
+      document.getElementById('signupCameraContainer').style.display = 'none';
+    }
+    
+    function captureSignupPhotoFrame() {
+      const video = document.getElementById('signupVideo');
+      if (!video || !signupCameraStream) return;
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 320;
+      canvas.height = video.videoHeight || 320;
+      const ctx = canvas.getContext('2d');
+      
+      // Make it square cropped
+      const size = Math.min(video.videoWidth, video.videoHeight);
+      const sx = (video.videoWidth - size) / 2;
+      const sy = (video.videoHeight - size) / 2;
+      ctx.drawImage(video, sx, sy, size, size, 0, 0, canvas.width, canvas.height);
+      
+      const base64 = canvas.toDataURL('image/jpeg');
+      compressProfileImage(base64, (compressed) => {
+        signupPhotoBase64 = compressed;
+        
+        const previewImg = document.getElementById('signupPhotoImg');
+        const placeholderIcon = document.getElementById('signupPlaceholderIcon');
+        
+        previewImg.src = compressed;
+        previewImg.style.display = 'block';
+        placeholderIcon.style.display = 'none';
+        
+        stopSignupCamera();
+      });
+    }
+    
+    // Submit registration
+    function handleSignupSubmit() {
+      const users = getAllUsers();
+      if (users.length >= 3) {
+        alert("Cannot register. GoalPad is limited to a maximum of 3 users per device.");
+        return;
+      }
+      
+      const data = {
+        fullName: document.getElementById('signupName').value,
+        email: document.getElementById('signupEmail').value,
+        age: document.getElementById('signupAge').value,
+        profession: document.getElementById('signupProfession').value,
+        password: document.getElementById('signupPassword').value,
+        confirmPassword: document.getElementById('signupConfirmPassword').value,
+        securityQuestion: document.getElementById('signupSecurityQuestion').value,
+        securityAnswer: document.getElementById('signupSecurityAnswer').value,
+        photo: signupPhotoBase64
+      };
+      
+      signup(data);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoalPad - Dashboard</title>
+  
+  <!-- CDN Links -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    checkSession();
+  </script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="fa-solid fa-compass"></i></div>
+        <span data-en="GoalPad" data-hi="गोलपैड">GoalPad</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item active">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Daily Goals" data-hi="दैनिक लक्ष्य">Daily Goals</span>
+        </a>
+        <a href="weekly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly Stats" data-hi="साप्ताहिक आंकड़े">Weekly Stats</span>
+        </a>
+        <a href="monthly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly Stats" data-hi="मासिक आंकड़े">Monthly Stats</span>
+        </a>
+        <a href="reminders.html" class="nav-item">
+          <i class="fa-solid fa-bell"></i>
+          <span data-en="Reminders" data-hi="रिमाइंडर्स">Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile & Settings" data-hi="प्रोफ़ाइल व सेटिंग्स">Profile & Settings</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-bottom">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">GP</div>
+          <div class="sidebar-user-details">
+            <div class="sidebar-user-name">Guest User</div>
+            <div class="sidebar-user-email">guest@goalpad.io</div>
+          </div>
+        </div>
+        <button class="sidebar-logout" onclick="logout()" data-en="Log Out" data-hi="लॉग आउट">Log Out</button>
+      </div>
+    </div>
+    
+    <!-- Main Content Wrapper -->
+    <div class="main-content">
+      
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div>
+          <h2 style="font-family: 'Syne', sans-serif;" id="pageTitleText" data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <button class="btn btn-ghost btn-sm" id="langToggleBtn">हिन्दी (Hindi)</button>
+          <button class="btn btn-ghost btn-sm" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+        </div>
+      </div>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        
+        <!-- Carry Forward Banner Container -->
+        <div id="carryForwardPlaceholder"></div>
+        
+        <!-- Greeting Header -->
+        <div class="fade-down" style="margin-bottom: 2rem;">
+          <h1 style="font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; margin-bottom: 0.25rem;" id="dashboardGreeting">
+            Hello, User!
+          </h1>
+          <p style="color: var(--muted); font-size: 0.95rem; font-weight: 500;" id="todayDateDisplayHeader">
+            --
+          </p>
+        </div>
+        
+        <!-- Quote of the Day Card -->
+        <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--accent); background: var(--bg2);">
+          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.5rem; font-weight: 700;" data-en="Daily Motivation" data-hi="दैनिक प्रेरणा">
+            Daily Motivation
+          </div>
+          <p style="font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 600; line-height: 1.6; min-height: 2.8rem; display: flex; align-items: center;">
+            <span id="typewriterQuote">"..."</span><span style="display: inline-block; width: 2px; height: 1.2rem; background: var(--accent); margin-left: 2px; animation: blinkCursor 0.75s step-end infinite;"></span>
+          </p>
+        </div>
+        
+        <!-- Stats Grid (4 Cards) -->
+        <div class="stats-grid">
+          <!-- Total Completed -->
+          <div class="stat-card card">
+            <div class="stat-icon"><i class="fa-solid fa-check-double"></i></div>
+            <div>
+              <div class="stat-value" id="statTotalCompleted">0</div>
+              <div class="stat-label" data-en="Total Completed" data-hi="कुल पूर्ण">Total Completed</div>
+            </div>
+          </div>
+          
+          <!-- Completion Rate -->
+          <div class="stat-card card">
+            <div class="stat-icon"><i class="fa-solid fa-percent"></i></div>
+            <div>
+              <div class="stat-value" id="statCompletionRate">0%</div>
+              <div class="stat-label" data-en="Completion Rate" data-hi="पूर्णता दर">Completion Rate</div>
+            </div>
+          </div>
+          
+          <!-- Streak (Flame) -->
+          <div class="stat-card card">
+            <div class="stat-icon" style="color: #FF6B6B;"><i class="fa-solid fa-fire streak-flame"></i></div>
+            <div>
+              <div class="stat-value" id="statStreak">0</div>
+              <div class="stat-label" data-en="Active Streak" data-hi="सक्रिय स्ट्रीक">Active Streak</div>
+            </div>
+          </div>
+          
+          <!-- Badges Earned -->
+          <div class="stat-card card">
+            <div class="stat-icon" style="color: #FACC15;"><i class="fa-solid fa-trophy"></i></div>
+            <div>
+              <div class="stat-value" id="statBadges">0</div>
+              <div class="stat-label" data-en="Badges Earned" data-hi="अर्जित बैज">Badges Earned</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Today's Progress Bar Gauge -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <h4 class="card-title" data-en="Today's Objectives Progress" data-hi="आज के लक्ष्यों की प्रगति">Today's Objectives Progress</h4>
+          <div class="progress-bar-wrap" style="height: 12px; border-radius: 6px;">
+            <div class="progress-bar" id="dailyProgressBar" style="width: 0%; border-radius: 6px;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--muted); font-weight: 600; margin-top: 0.5rem;">
+            <span id="dailyProgressText">0% Completed (0/0 goals)</span>
+            <a href="daily.html" style="color: var(--accent); text-decoration: none;" data-en="Manage Goals &rarr;" data-hi="लक्ष्य प्रबंधित करें &rarr;">Manage Goals &rarr;</a>
+          </div>
+        </div>
+        
+        <!-- Layout Grid: Charts and Quick Actions -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: start;" class="dashboard-details-grid">
+          <!-- Weekly Chart -->
+          <div class="card">
+            <h4 class="card-title" data-en="Weekly Goal Achievements" data-hi="साप्ताहिक लक्ष्य प्राप्ति">Weekly Goal Achievements</h4>
+            <div style="height: 230px; position: relative;">
+              <canvas id="weeklyChartCanvas"></canvas>
+            </div>
+          </div>
+          
+          <!-- Quick Actions -->
+          <div class="card">
+            <h4 class="card-title" data-en="Quick Actions" data-hi="त्वरित विकल्प">Quick Actions</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <a href="daily.html" class="btn btn-ghost btn-full" style="justify-content: flex-start; gap: 0.875rem;">
+                <i class="fa-solid fa-calendar-day" style="color: var(--accent);"></i>
+                <span data-en="Go to Today's Goals" data-hi="आज के लक्ष्यों पर जाएं">Go to Today's Goals</span>
+              </a>
+              <a href="weekly.html" class="btn btn-ghost btn-full" style="justify-content: flex-start; gap: 0.875rem;">
+                <i class="fa-solid fa-calendar-week" style="color: var(--accent);"></i>
+                <span data-en="View Weekly Stats" data-hi="साप्ताहिक रिपोर्ट देखें">View Weekly Stats</span>
+              </a>
+              <a href="monthly.html" class="btn btn-ghost btn-full" style="justify-content: flex-start; gap: 0.875rem;">
+                <i class="fa-solid fa-calendar-days" style="color: var(--accent);"></i>
+                <span data-en="View Monthly Stats" data-hi="मासिक रिपोर्ट देखें">View Monthly Stats</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Mobile Bottom Navigation -->
+    <div class="bottom-nav">
+      <div class="bottom-nav-items">
+        <a href="dashboard.html" class="bottom-nav-item active">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Goals" data-hi="लक्ष्य">Goals</span>
+        </a>
+        <a href="weekly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly" data-hi="साप्ताहिक">Weekly</span>
+        </a>
+        <a href="monthly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly" data-hi="मासिक">Monthly</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile" data-hi="प्रोफ़ाइल">Profile</span>
+        </a>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Scripts Bundle -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/proof.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    // Motivational quotes list
+    const quotes = [
+      { en: "Believe you can and you're halfway there.", hi: "विश्वास रखें कि आप कर सकते हैं, तो आपका आधा काम हो गया।" },
+      { en: "The only way to do great work is to love what you do.", hi: "शानदार काम करने का एकमात्र तरीका यह है कि आप जो करते हैं उससे प्यार करें।" },
+      { en: "Don't count the days, make the days count.", hi: "दिनों को मत गिनो, दिनों को सार्थक बनाओ।" },
+      { en: "It always seems impossible until it's done.", hi: "जब तक काम पूरा न हो जाए, तब तक वह असंभव ही लगता है।" },
+      { en: "You don't have to be great to start, but you have to start to be great.", hi: "शुरुआत करने के लिए आपका महान होना ज़रूरी नहीं है, लेकिन महान बनने के लिए आपकी शुरुआत ज़रूरी है।" },
+      { en: "Success is not final, failure is not fatal: it is the courage to continue that counts.", hi: "सफलता अंतिम नहीं है, असफलता घातक नहीं है: जारी रखने का साहस ही मायने रखता है।" },
+      { en: "Act as if what you do makes a difference. It does.", hi: "ऐसे काम करें जैसे आपका काम बदलाव लाता है। यह लाता है।" },
+      { en: "Believe in yourself and all that you are.", hi: "स्वयं पर और अपनी हर एक खूबी पर विश्वास रखें।" },
+      { en: "Your limit is only your imagination.", hi: "आपकी सीमा केवल आपकी कल्पना है।" },
+      { en: "Push yourself, because no one else is going to do it for you.", hi: "खुद को आगे बढ़ाएं, क्योंकि कोई और आपके लिए यह नहीं करने वाला।" },
+      { en: "Great things never come from comfort zones.", hi: "महान चीजें कभी भी आरामदेह माहौल से नहीं आतीं।" },
+      { en: "Dream it. Wish it. Do it.", hi: "सपना देखें। चाहत रखें। कर दिखाएं।" },
+      { en: "Success doesn't just find you. You have to go out and get it.", hi: "सफलता सिर्फ आपको ढूंढती नहीं है। आपको बाहर जाकर इसे हासिल करना होगा।" },
+      { en: "The harder you work for something, the greater you'll feel when you achieve it.", hi: "आप किसी चीज के लिए जितनी मेहनत करेंगे, उसे हासिल करने पर उतना ही अच्छा महसूस करेंगे।" },
+      { en: "Dream bigger. Do bigger.", hi: "बड़ा सपना देखें। बड़ा काम करें।" },
+      { en: "Don't stop when you are tired. Stop when you are done.", hi: "जब आप थक जाएं तो न रुकें। तब रुकें जब आपका काम पूरा हो जाए।" },
+      { en: "Wake up with determination. Go to bed with satisfaction.", hi: "दृढ़ संकल्प के साथ जागें। संतोष के साथ सोने जाएं।" },
+      { en: "Do something today that your future self will thank you for.", hi: "आज ऐसा कुछ करें जिसके लिए आपका भविष्य का स्वरूप आपको धन्यवाद दे।" },
+      { en: "Little things make big days.", hi: "छोटी-छोटी बातें बड़े दिन बनाती हैं।" },
+      { en: "It's going to be hard, but hard does not mean impossible.", hi: "यह कठिन होने वाला है, लेकिन कठिन का मतलब असंभव नहीं है।" },
+      { en: "Focus on being productive instead of busy.", hi: "व्यस्त रहने के बजाय उत्पादक होने पर ध्यान केंद्रित करें।" },
+      { en: "You are capable of amazing things.", hi: "आप अद्भुत काम करने में सक्षम हैं।" },
+      { en: "Be stronger than your excuses.", hi: "अपने बहानों से ज़्यादा मजबूत बनो।" },
+      { en: "The key to success is to focus on goals, not obstacles.", hi: "सफलता की कुंजी बाधाओं पर नहीं, बल्कि लक्ष्यों पर ध्यान केंद्रित करना है।" },
+      { en: "Start where you are. Use what you have. Do what you can.", hi: "जहां हैं वहीं से शुरू करें। जो पास है उसका उपयोग करें। जो कर सकते हैं वह करें।" },
+      { en: "Small daily improvements over time lead to stunning results.", hi: "समय के साथ छोटे-छोटे दैनिक सुधार आश्चर्यजनक परिणाम लाते हैं।" },
+      { en: "If it matters to you, you will find a way.", hi: "अगर यह आपके लिए मायने रखता है, तो आप रास्ता खोज लेंगे।" },
+      { en: "Your passion is waiting for your courage to catch up.", hi: "आपका जुनून आपके साहस के साथ तालमेल बिठाने का इंतजार कर रहा है।" },
+      { en: "Action is the foundational key to all success.", hi: "कर्म ही सभी सफलताओं की आधारशिला है।" },
+      { en: "Make each day your masterpiece.", hi: "हर दिन को अपनी उत्कृष्ट कृति बनाएं।" }
+    ];
+    
+    // Typewriter quotes trigger
+    function typeQuote(quoteObj, lang) {
+      const container = document.getElementById('typewriterQuote');
+      if (!container) return;
+      
+      const text = lang === 'hi' ? quoteObj.hi : quoteObj.en;
+      container.innerHTML = '';
+      let i = 0;
+      
+      function type() {
+        if (i < text.length) {
+          container.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(type, 35);
+        }
+      }
+      type();
+    }
+    
+    // Greeting hour handler
+    function getGreeting(name) {
+      const hr = new Date().getHours();
+      let greet = "Good Morning";
+      if (hr >= 12 && hr < 17) greet = "Good Afternoon";
+      if (hr >= 17) greet = "Good Evening";
+      return `${greet}, ${name}!`;
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser();
+      if (!user) return;
+      
+      // Update greeting
+      const greetText = getGreeting(user.fullName.split(' ')[0]);
+      document.getElementById('dashboardGreeting').textContent = greetText;
+      
+      // Typewriter Quote load
+      const dayOfMonth = new Date().getDate();
+      const quoteObj = quotes[(dayOfMonth - 1) % quotes.length];
+      const settings = getSettings();
+      typeQuote(quoteObj, settings.language);
+      
+      // Listen to language toggles to update typewriter
+      const langBtn = document.getElementById('langToggleBtn');
+      if (langBtn) {
+        langBtn.addEventListener('click', () => {
+          const s = getSettings();
+          typeQuote(quoteObj, s.language);
+        });
+      }
+      
+      // Calculate Stats
+      let totalGoals = 0;
+      let totalCompleted = 0;
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith(`goalpad_${user.email.toLowerCase()}_goals_`)) {
+          const goals = JSON.parse(localStorage.getItem(key) || '[]');
+          totalGoals += goals.length;
+          totalCompleted += goals.filter(g => g.done).length;
+        }
+      }
+      
+      const streak = getStreak();
+      const badges = getBadges();
+      const pct = totalGoals > 0 ? Math.round((totalCompleted / totalGoals) * 100) : 0;
+      
+      // Animate numbers
+      animateCount(document.getElementById('statTotalCompleted'), totalCompleted);
+      animateCount(document.getElementById('statCompletionRate'), pct);
+      animateCount(document.getElementById('statStreak'), streak.currentStreak);
+      animateCount(document.getElementById('statBadges'), badges.length);
+      
+      // Load progress bars
+      const today = getTodayDate();
+      const todayGoals = getGoals(today);
+      const progressBar = document.getElementById('dailyProgressBar');
+      const progressText = document.getElementById('dailyProgressText');
+      
+      if (todayGoals.length > 0) {
+        const todayCompleted = todayGoals.filter(g => g.done).length;
+        const todayPct = Math.round((todayCompleted / todayGoals.length) * 100);
+        progressBar.style.width = `${todayPct}%`;
+        progressText.textContent = `${todayPct}% Completed (${todayCompleted}/${todayGoals.length} goals)`;
+      }
+      
+      // Render weekly compliance Chart.js
+      renderWeeklyChart('weeklyChartCanvas');
+      
+      // Check yesterday incomplete goals carries
+      checkCarryForward();
+    });
+  </script>
+</body>
+</html>

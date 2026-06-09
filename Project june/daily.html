@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoalPad - Daily Goals</title>
+  
+  <!-- CDN Links -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    checkSession();
+  </script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="fa-solid fa-compass"></i></div>
+        <span data-en="GoalPad" data-hi="गोलपैड">GoalPad</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="nav-item active">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Daily Goals" data-hi="दैनिक लक्ष्य">Daily Goals</span>
+        </a>
+        <a href="weekly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly Stats" data-hi="साप्ताहिक आंकड़े">Weekly Stats</span>
+        </a>
+        <a href="monthly.html" class="nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly Stats" data-hi="मासिक आंकड़े">Monthly Stats</span>
+        </a>
+        <a href="reminders.html" class="nav-item">
+          <i class="fa-solid fa-bell"></i>
+          <span data-en="Reminders" data-hi="रिमाइंडर्स">Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile & Settings" data-hi="प्रोफ़ाइल व सेटिंग्स">Profile & Settings</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-bottom">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">GP</div>
+          <div class="sidebar-user-details">
+            <div class="sidebar-user-name">Guest User</div>
+            <div class="sidebar-user-email">guest@goalpad.io</div>
+          </div>
+        </div>
+        <button class="sidebar-logout" onclick="logout()" data-en="Log Out" data-hi="लॉग आउट">Log Out</button>
+      </div>
+    </div>
+    
+    <!-- Main Content Wrapper -->
+    <div class="main-content">
+      
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div>
+          <h2 style="font-family: 'Syne', sans-serif;" id="pageTitleText" data-en="Daily Goals" data-hi="दैनिक लक्ष्य">Daily Goals</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <button class="btn btn-ghost btn-sm" id="langToggleBtn">हिन्दी (Hindi)</button>
+          <button class="btn btn-ghost btn-sm" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+        </div>
+      </div>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        
+        <!-- Carry Forward Banner Container -->
+        <div id="carryForwardPlaceholder"></div>
+        
+        <!-- Header -->
+        <div class="fade-down" style="margin-bottom: 2rem;">
+          <h1 style="font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; margin-bottom: 0.25rem;" data-en="Today's Objectives" data-hi="आज के उद्देश्य">
+            Today's Objectives
+          </h1>
+          <p style="color: var(--muted); font-size: 0.95rem; font-weight: 500;" id="todayDateDisplayHeader">
+            --
+          </p>
+        </div>
+        
+        <!-- Progress Bar at top of daily objectives -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem;">
+            <span data-en="Daily Progression" data-hi="दैनिक प्रगति">Daily Progression</span>
+            <span id="dailyProgressText">0% Completed (0/0 goals)</span>
+          </div>
+          <div class="progress-bar-wrap" style="height: 10px; border-radius: 5px;">
+            <div class="progress-bar" id="dailyProgressBar" style="width: 0%; border-radius: 5px;"></div>
+          </div>
+        </div>
+        
+        <!-- Grid layout: Overall Deadline and Add Goal Forms -->
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; margin-bottom: 2rem;" class="daily-inputs-grid">
+          
+          <!-- Column 1: Overall Daily Deadline Setter -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card">
+              <h4 class="card-title" data-en="Set Daily Deadline" data-hi="दैनिक अंतिम समय सेट करें">Set Daily Deadline</h4>
+              
+              <div class="time-picker-wrap">
+                <div class="time-picker-row">
+                  <select class="time-select" id="overallHour">
+                    <!-- populated 1-12 -->
+                  </select>
+                  <span class="time-colon">:</span>
+                  <select class="time-select" id="overallMinute">
+                    <!-- populated 00-55 -->
+                  </select>
+                  <div class="ampm-toggle" id="overallAmPmToggle">
+                    <button class="ampm-btn active" data-value="AM" onclick="setOverallAmPm('AM')">AM</button>
+                    <button class="ampm-btn" data-value="PM" onclick="setOverallAmPm('PM')">PM</button>
+                  </div>
+                </div>
+                <div class="time-preview" id="overallTimePreview">Selected: 06:00 PM</div>
+              </div>
+              
+              <button class="btn btn-primary btn-full" onclick="setOverallDeadline()" data-en="Set Deadline" data-hi="समय सीमा तय करें">Set Deadline</button>
+            </div>
+            
+            <!-- Live Countdown Timer Display -->
+            <div id="todayDeadlineDisplay">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+          
+          <!-- Column 2: Add Goal Form -->
+          <div class="card">
+            <h4 class="card-title" data-en="Add New Goal" data-hi="नया लक्ष्य जोड़ें">Add New Goal</h4>
+            
+            <div class="form-group">
+              <label class="form-label" for="goalTitle" data-en="Goal Title" data-hi="लक्ष्य का नाम">Goal Title</label>
+              <input type="text" class="form-input" id="goalTitle" placeholder="e.g. Morning gym session" data-placeholder-en="e.g. Morning gym session" data-placeholder-hi="जैसे: सुबह कसरत करें">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label" for="goalCategory" data-en="Category" data-hi="श्रेणी">Category</label>
+                <select class="form-select" id="goalCategory">
+                  <option value="Health" data-en="Health & Fitness" data-hi="स्वास्थ्य और कसरत">Health</option>
+                  <option value="Study" data-en="Study & Learning" data-hi="पढ़ाई और शिक्षा">Study</option>
+                  <option value="Work" data-en="Work & Tasks" data-hi="कार्य और नौकरी">Work</option>
+                  <option value="Personal" data-en="Personal & Growth" data-hi="व्यक्तिगत सुधार">Personal</option>
+                  <option value="Other" data-en="Other" data-hi="अन्य">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="goalPriority" data-en="Priority" data-hi="प्राथमिकता">Priority</label>
+                <select class="form-select" id="goalPriority">
+                  <option value="High" data-en="🔥 High" data-hi="🔥 उच्च">High</option>
+                  <option value="Medium" data-en="⚡ Medium" data-hi="⚡ मध्यम" selected>Medium</option>
+                  <option value="Low" data-en="🍃 Low" data-hi="🍃 निम्न">Low</option>
+                </select>
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label" for="goalRecurring" data-en="Recurring" data-hi="आवर्ती">Recurring</label>
+                <select class="form-select" id="goalRecurring">
+                  <option value="None" data-en="None" data-hi="कोई नहीं">None</option>
+                  <option value="Daily" data-en="Daily" data-hi="दैनिक">Daily</option>
+                  <option value="Weekly" data-en="Weekly" data-hi="साप्ताहिक">Weekly</option>
+                </select>
+              </div>
+              <div class="form-group" style="display: flex; align-items: center; padding-top: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; user-select: none;">
+                  <input type="checkbox" id="useIndividualDeadline" onchange="toggleIndividualDeadlinePicker(this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+                  <span data-en="Set Deadline Time" data-hi="समय सीमा तय करें">Set Deadline Time</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- Individual Goal Deadline Picker (Hidden by default) -->
+            <div class="time-picker-wrap" id="individualDeadlinePickerWrapper" style="display: none; border-top: 1px dashed var(--border); padding-top: 1rem;">
+              <label class="form-label" data-en="Goal Deadline" data-hi="लक्ष्य की समय सीमा">Goal Deadline</label>
+              <div class="time-picker-row">
+                <select class="time-select" id="goalHour">
+                  <!-- populated 1-12 -->
+                </select>
+                <span class="time-colon">:</span>
+                <select class="time-select" id="goalMinute">
+                  <!-- populated 00-55 -->
+                </select>
+                <div class="ampm-toggle" id="goalAmPmToggle">
+                  <button class="ampm-btn active" data-value="AM" onclick="setGoalAmPm('AM')">AM</button>
+                  <button class="ampm-btn" data-value="PM" onclick="setGoalAmPm('PM')">PM</button>
+                </div>
+              </div>
+              <div class="time-preview" id="goalTimePreview">Selected: 08:00 AM</div>
+            </div>
+            
+            <button class="btn btn-primary btn-full" onclick="addGoalSubmit()" style="margin-top: 0.5rem;" data-en="Add Goal" data-hi="लक्ष्य जोड़ें">Add Goal</button>
+          </div>
+        </div>
+        
+        <!-- Daily Goals List Section -->
+        <div class="card">
+          <h4 class="card-title" data-en="Objectives Log" data-hi="लक्ष्य लॉग">Objectives Log</h4>
+          <div id="goalsList">
+            <!-- Goals cards list rendered dynamically -->
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Mobile Bottom Navigation -->
+    <div class="bottom-nav">
+      <div class="bottom-nav-items">
+        <a href="dashboard.html" class="bottom-nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+        </a>
+        <a href="daily.html" class="bottom-nav-item active">
+          <i class="fa-solid fa-calendar-day"></i>
+          <span data-en="Goals" data-hi="लक्ष्य">Goals</span>
+        </a>
+        <a href="weekly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-week"></i>
+          <span data-en="Weekly" data-hi="साप्ताहिक">Weekly</span>
+        </a>
+        <a href="monthly.html" class="bottom-nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span data-en="Monthly" data-hi="मासिक">Monthly</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span data-en="Profile" data-hi="प्रोफ़ाइल">Profile</span>
+        </a>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Scripts Bundle -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/proof.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    let overallTimeState = { hour: '06', minute: '00', ampm: 'PM' };
+    let goalTimeState = { hour: '08', minute: '00', ampm: 'AM' };
+    
+    // Overall Deadline pickers
+    function setOverallAmPm(val) {
+      overallTimeState.ampm = val;
+      document.querySelectorAll('#overallAmPmToggle .ampm-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-value') === val);
+      });
+      updateOverallPreview();
+    }
+    
+    function updateOverallPreview() {
+      document.getElementById('overallTimePreview').textContent = `Selected: ${overallTimeState.hour}:${overallTimeState.minute} ${overallTimeState.ampm}`;
+    }
+    
+    // Goal picker state
+    function setGoalAmPm(val) {
+      goalTimeState.ampm = val;
+      document.querySelectorAll('#goalAmPmToggle .ampm-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-value') === val);
+      });
+      updateGoalPreview();
+    }
+    
+    function updateGoalPreview() {
+      document.getElementById('goalTimePreview').textContent = `Selected: ${goalTimeState.hour}:${goalTimeState.minute} ${goalTimeState.ampm}`;
+    }
+    
+    function toggleIndividualDeadlinePicker(checked) {
+      document.getElementById('individualDeadlinePickerWrapper').style.display = checked ? 'block' : 'none';
+    }
+    
+    function populateDropdowns() {
+      const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+      const minutes = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
+      
+      const hourOptions = hours.map(h => `<option value="${h}">${h}</option>`).join('');
+      const minuteOptions = minutes.map(m => `<option value="${m}">${m}</option>`).join('');
+      
+      document.getElementById('overallHour').innerHTML = hourOptions;
+      document.getElementById('overallMinute').innerHTML = minuteOptions;
+      document.getElementById('goalHour').innerHTML = hourOptions;
+      document.getElementById('goalMinute').innerHTML = minuteOptions;
+      
+      // Defaults
+      document.getElementById('overallHour').value = '06';
+      document.getElementById('overallMinute').value = '00';
+      document.getElementById('goalHour').value = '08';
+      document.getElementById('goalMinute').value = '00';
+      
+      // Listeners
+      document.getElementById('overallHour').addEventListener('change', e => {
+        overallTimeState.hour = e.target.value;
+        updateOverallPreview();
+      });
+      document.getElementById('overallMinute').addEventListener('change', e => {
+        overallTimeState.minute = e.target.value;
+        updateOverallPreview();
+      });
+      document.getElementById('goalHour').addEventListener('change', e => {
+        goalTimeState.hour = e.target.value;
+        updateGoalPreview();
+      });
+      document.getElementById('goalMinute').addEventListener('change', e => {
+        goalTimeState.minute = e.target.value;
+        updateGoalPreview();
+      });
+    }
+    
+    function setOverallDeadline() {
+      const today = getTodayDate();
+      const timeStr = `${overallTimeState.hour}:${overallTimeState.minute} ${overallTimeState.ampm}`;
+      saveDailyDeadline(today, timeStr);
+      showTodayDeadline();
+      showToast("Overall daily deadline updated!", "success");
+    }
+    
+    function addGoalSubmit() {
+      // Temporary override pickerTimeState parameters in goals.js
+      pickerTimeState = {
+        hour: goalTimeState.hour,
+        minute: goalTimeState.minute,
+        ampm: goalTimeState.ampm
+      };
+      
+      addGoal();
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      populateDropdowns();
+      showTodayDeadline();
+      
+      // *** Render goals on page load ***
+      const today = getTodayDate();
+      showTodayDate();
+      renderGoals(today);
+      checkCarryForward();
+      
+      // Live ticker countdown updater
+      setInterval(updateDeadlineCountdowns, 30000);
+    });
+  </script>
+</body>
+</html>
